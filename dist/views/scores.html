@@ -1,0 +1,44 @@
+<section id="tables">
+	<div class="left-initial">
+		<div class="groups" ng-repeat="(groupKey, groupValue) in scores.tableAD">
+			<ul class="group-list" ng-repeat="(teamKey, teamValue) in scores.tableAD[groupKey]">
+						<img class="flag" ng-src="{{teamValue.crestURI}}">
+						<li class="value"><span>{{teamValue.playedGames}}</span></li>
+						<li class="valueName"><span class="valueTextName">{{teamValue.team}}</span></li>
+						<li class="value"><span>{{teamValue.goals}}</span></li>
+						<li class="value"><span>{{teamValue.goalsAgainst}}</span></li>
+						<li class="value"><span>{{teamValue.goalDifference}}</span></li>
+						<li class="value"><span>{{teamValue.rank}}</li></span{{teamValue.rank}}<>
+					</ul>
+		</div>
+	</div>
+	<div class="left-last16">
+
+	</div>
+	<div class="left-quarter-finals">
+
+	</div>
+	<div class="center-finals">
+
+	</div>
+	<div class="right-quarter-finals">
+
+	</div>
+	<div class="right-last16">
+
+	</div>
+	<div class="right-initial">
+		<div class="groups" ng-repeat="(groupKey, groupValue) in scores.tableEH">
+			<ul class="group-list" ng-repeat="(teamKey, teamValue) in scores.tableEH[groupKey]">
+						<img class="flag" ng-src="{{teamValue.crestURI}}">
+						<li class="value">{{teamValue.playedGames}}</li>
+						<li class="valueName">{{teamValue.team}}</li>
+						<li class="value">{{teamValue.goals}}</li>
+						<li class="value">{{teamValue.goalsAgainst}}</li>
+						<li class="value">{{teamValue.goalDifference}}</li>
+						<li class="value">{{teamValue.rank}}</li>
+					</ul>
+		</div>
+	</div>
+</section>
+<p ng-show="scores.currentMatchDay">{{scores.currentMatchDay}}</p>

@@ -1,0 +1,121 @@
+body, section, ul, li {
+	display: flex;
+	flex-wrap: wrap;
+}
+body {
+	width: 100%;
+	min-height: 100%;
+	margin: 0px;
+}
+.nav-bar {
+	width: 100%;
+	height: 15vh;
+	background-color: #DF3A01;
+}
+.navList {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	list-style-type: none;
+	padding: 0;
+}
+.navItem {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	text-decoration: none;
+	font-size: 30px;
+	width: 33.33333%;
+	height: 100%;
+}
+.navItemLink {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	text-decoration: none;
+	width: 100%;
+	height: 100%;
+	transition: 0.2s;
+}
+.navItemLink:hover {
+	transition: 0.2s;
+	cursor: pointer;
+	box-shadow: inset 0px -130px 0px 0px rgba(255,255,255,0.75);
+	color: #DF3A01;
+}
+.addedView {
+	width: 100%;
+	min-height: 100%;
+}
+
+/* Group tables */
+.left-initial, .right-initial {
+	width: 25%;
+	height: 80%;
+}
+.groups {
+	border: 1px solid silver;
+	width: 100%;
+	height: 10%;
+	margin-bottom: 1em;
+	margin-top: 1em;
+}
+.group-list {
+	display: flex;
+	flex-direction: row;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 2.5em;
+	border: 1px solid black;
+	padding: 0;
+}
+.flag {
+	width: 20%;
+	height: 100%;
+}
+.value {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	width: 10%;
+	margin: 0;
+	border: 1px solid silver;
+}
+.valueName {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	width: 25%;
+	margin: 0;
+	border: 1px solid silver;
+}
+#tables {
+	display: flex;
+	justify-content: space-between;
+	padding: 1em;
+}
+.valueTextName {
+	display: flex;
+	align-items: center;
+	word-wrap: break-word;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+.saveBtn {
+	width: 200px;
+	height: 200px;
+	border: 1px solid black;
+	border-radius: 10px;
+	background-color: white;
+	color: black;
+	font-size: 40px;
+}
+
