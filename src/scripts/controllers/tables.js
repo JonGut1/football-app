@@ -1,6 +1,6 @@
-const fs = require('fs');
 angular.module('worldCupScoresApp')
 	.controller('TablesCtrl', ['matchesStore', '$scope', function(match, $scope) {
+		console.log(match);
 		const t = this;
 		this.name = 'Matas';
 		this.insert = new Map();
@@ -21,7 +21,8 @@ angular.module('worldCupScoresApp')
 		this.penalties = [];
 		this.click = function() {
 			console.log(t.test);
-		}
+			match.insertData(t.test);
+		};
 		this.matchesDisp = [];
 		this.split;
 

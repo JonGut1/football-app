@@ -1,9 +1,10 @@
-var gulp = require('gulp');
-var sass = require('gulp-sass');
-var autoprefixer = require('gulp-autoprefixer');
-var browserSync = require('browser-sync').create();
-var babel = require('gulp-babel');
-var browserify = require('gulp-browserify');
+const gulp = require('gulp');
+const sass = require('gulp-sass');
+const autoprefixer = require('gulp-autoprefixer');
+const browserSync = require('browser-sync').create();
+const babel = require('gulp-babel');
+const browserify = require('gulp-browserify');
+const connect = require('gulp-connect-php');
 /**
 * Refreshes the page after save file
 */
@@ -35,9 +36,12 @@ gulp.task('default', function(done) {
 	gulp.watch('src/styles/*.css', gulp.series('styles'))
 	gulp.watch('src/index.html', gulp.series('copy-html'))
 	gulp.watch('src/views/*.html', gulp.series('copy-html'))
-	gulp.watch('src/scripts/*.js', gulp.series('scripts'))
-	gulp.watch('src/scripts/controllers/*.js', gulp.series('scripts'))
-	gulp.watch('src/data/*.json', gulp.series('copy-html'))
+	gulp.watch('src/scripts/*.js', gulp.series('scriptsApp'))
+	gulp.watch('src/scripts/service/*.js', gulp.series('scriptsService'))
+	gulp.watch('src/scripts/controllers/*.js', gulp.series('scriptsControllers'))
+	gulp.watch('src/scripts/data/*.json', gulp.series('copy-data'))
+	gulp.watch('src/scripts/php/*.php', gulp.series('copy-php'))
+	connect.server();
 
 	done()
 });
@@ -45,19 +49,7 @@ gulp.task('default', function(done) {
 * Creates new .js files that are converted to ES 2015.
 * also those files are saved in a different folder.
 */
-gulp.task('scripts', function(done) {
-	gulp.src('src/scripts/*.js')
-	.pipe(babel( {
-		plugins: ['transform-runtime'],
-        presets: ['env']
-    }))
-    /**
-	* Inserts globals, so that require would be difined in main js files.
-	*/
-	.pipe(browserify( {
-		insertGlobals: true
-	}))
-	.pipe(gulp.dest('dist/scripts'))
+gulp.task('scriptsControllers', function(done) {
 	gulp.src('src/scripts/controllers/*.js')
 	.pipe(babel( {
 		plugins: ['transform-runtime'],
@@ -73,6 +65,49 @@ gulp.task('scripts', function(done) {
 	browserSync.reload();
 	done()
 });
+
+gulp.task('scriptsApp', function(done) {
+	gulp.src('src/scripts/*.js')
+	.pipe(babel( {
+		plugins: ['transform-runtime'],
+        presets: ['env']
+    }))
+    /**
+	* Inserts globals, so that require would be difined in main js files.
+	*/
+	//.pipe(browserify( {
+		//insertGlobals: true
+	//}))
+	.pipe(gulp.dest('dist/scripts'))
+	browserSync.reload();
+	done()
+});
+
+gulp.task('scriptsService', function(done) {
+	gulp.src('src/scripts/service/*.js')
+	.pipe(babel( {
+		plugins: ['transform-runtime'],
+        presets: ['env']
+    }))
+    .on('error', () => {
+		console.log("Error");
+	})
+    /**
+	* Inserts globals, so that require would be difined in main js files.
+	*/
+	.pipe(browserify( {
+		insertGlobals: true
+	}))
+	.on('error', () => {
+		console.log("Error");
+	})
+	.pipe(gulp.dest('dist/scripts/service'))
+	.on('error', () => {
+		console.log("Error");
+	})
+	browserSync.reload();
+	done()
+});
 /**
 * Copies the index.html file to a dist folder on save.
 */
@@ -83,10 +118,20 @@ gulp.task('copy-html', function(done) {
 	gulp.src('src/views/*.html')
 	.pipe(gulp.dest('dist/views'))
 
-	gulp.src('src/data/*.json')
-	.pipe(gulp.dest('dist/data'))
-
 	browserSync.reload();
 	done()
 });
 
+gulp.task('copy-data', function(done) {
+	gulp.src('src/scripts/data/*.json')
+	.pipe(gulp.dest('dist/scripts/data'))
+	browserSync.reload();
+	done()
+});
+
+gulp.task('copy-php', function(done) {
+	gulp.src('src/scripts/php/*.php')
+	.pipe(gulp.dest('dist/scripts/php'))
+	browserSync.reload();
+	done()
+});

@@ -15,6 +15,7 @@ angular.module('worldCupScoresApp')
     this.tableAD;
     this.tableEH;
 
+
     	match.promiseCheck.then(response => {
         match.getFixtures(response._links).then(resp => {
           console.log(resp);

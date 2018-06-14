@@ -1,6 +1,7 @@
 angular.module('worldCupScoresApp')
 	.service('matchesStore', function() {
 		//console.log(1);
+
 		const t = this;
 		const header = new Headers({
 			'X-Auth-Token': '80c6fdd4a03948d7a56a6fe6d94b29a2',
@@ -8,7 +9,6 @@ angular.module('worldCupScoresApp')
     	this.general = new Map();
     	this.table = {};
         this.matches = new Map();
-
 
     	this.promiseCheck =
     		fetch('http://api.football-data.org/v1/competitions/467', {
@@ -81,5 +81,21 @@ angular.module('worldCupScoresApp')
                 }
                 return times;
             })
+        };
+
+        this.insertData = function(data) {
+            const newData = JSON.stringify(data);
+            jQuery.post('/src/scripts/php/insert.php', {
+                newData: newData
+            }, function(response){
+                console.log(response);
+                // response could contain the url of the newly saved file
+            });
+        };
+        this.getData = function() {
+
+        };
+        this.fileCheck = function(check) {
+            console.log(`The file is ${check}`);
         };
 	});
