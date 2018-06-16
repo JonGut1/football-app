@@ -1428,5 +1428,5 @@ angular.module('worldCupScoresApp').controller('LivescoresCtrl', ['matchesStore'
     });
   });
 }]);
-}).call(this,require("FT5ORs"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_7595b6ef.js","/")
+}).call(this,require("FT5ORs"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_624266cb.js","/")
 },{"FT5ORs":4,"buffer":2}]},{},[5])

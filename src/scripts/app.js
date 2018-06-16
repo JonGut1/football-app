@@ -28,5 +28,10 @@ angular
       url: '/tables',
       templateUrl: 'views/tables.html',
       controller: 'TablesCtrl as tables'
+    })
+    .state('leaderboard', {
+      url: '/leaderboard',
+      templateUrl: 'views/leaderBoard.html',
+      controller: 'LeaderBoardCtrl as board'
     });
   }]);

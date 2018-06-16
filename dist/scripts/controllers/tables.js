@@ -2799,8 +2799,14 @@ angular.module('worldCupScoresApp').controller('TablesCtrl', ['matchesStore', '$
 	this.names = ['Jonas', 'Matas', 'Greta', 'Rokas'];
 	this.penalties = [];
 	this.click = function () {
-		console.log(t.test);
-		match.insertData(t.test);
+		fetch("/src/scripts/data/data.json").then(function (response) {
+			//console.log(response);
+			return response.json();
+		}).then(function (data) {
+			console.log(data);
+		});
+		//console.log(t.test);
+		//match.insertData(t.test);
 	};
 	this.matchesDisp = [];
 	this.split;
@@ -2835,5 +2841,5 @@ angular.module('worldCupScoresApp').controller('TablesCtrl', ['matchesStore', '$
 		//console.log(t.split);
 	};
 }]);
-}).call(this,require("FT5ORs"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_7163ea10.js","/")
+}).call(this,require("FT5ORs"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_191ccb63.js","/")
 },{"FT5ORs":79,"babel-runtime/core-js/map":1,"buffer":3}]},{},[80])

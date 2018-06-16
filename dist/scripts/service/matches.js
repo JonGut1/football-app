@@ -3426,8 +3426,6 @@ var _map2 = _interopRequireDefault(_map);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 angular.module('worldCupScoresApp').service('matchesStore', function () {
-    //console.log(1);
-
     var t = this;
     var header = new Headers({
         'X-Auth-Token': '80c6fdd4a03948d7a56a6fe6d94b29a2'
@@ -3435,6 +3433,7 @@ angular.module('worldCupScoresApp').service('matchesStore', function () {
     this.general = new _map2.default();
     this.table = {};
     this.matches = new _map2.default();
+    this.playerData = {};
 
     this.promiseCheck = fetch('http://api.football-data.org/v1/competitions/467', {
         headers: header
@@ -3514,5 +3513,5 @@ angular.module('worldCupScoresApp').service('matchesStore', function () {
         console.log('The file is ' + check);
     };
 });
-}).call(this,require("FT5ORs"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_75f55116.js","/")
+}).call(this,require("FT5ORs"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ee757212.js","/")
 },{"FT5ORs":95,"babel-runtime/core-js/json/stringify":1,"babel-runtime/core-js/map":2,"babel-runtime/core-js/promise":3,"buffer":5}]},{},[96])
