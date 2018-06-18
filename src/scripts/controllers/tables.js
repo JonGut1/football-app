@@ -13,6 +13,7 @@ angular.module('worldCupScoresApp')
 		this.winner = [];
 		this.sortOf = [];
 		this.fail = [];
+		this.datalistNames;
 		this.test = {
 			name: '',
 			goalsMain: {
@@ -111,6 +112,13 @@ angular.module('worldCupScoresApp')
 		this.matchesDisp = [];
 		this.split;
 
+		this.updateDatalist = function(el) {
+			$scope.$apply(function() {
+				t.datalistNames = el;
+			});
+			console.log(el);
+		};
+
 		match.promiseCheck.then(response => {
 			match.getMatches(response._links).then(resp => {
 				//console.log(match.matches);
@@ -118,6 +126,7 @@ angular.module('worldCupScoresApp')
 				console.log(match.playerData);
 				t.matchesDisplay(match.matches);
 				t.checkResults(match.matches);
+				t.updateDatalist(match.playerData.General.names);
 				//console.log(match.matches);
 			});
     	});
@@ -142,7 +151,7 @@ angular.module('worldCupScoresApp')
 												const teamH = el[first]['teamH'];
 												if (first === "penaltyShootout") {
 													if (teamA[1].length > 0 && teamH[1].length > 0) {
-
+														console.log("penalties");
 														console.log(teamA[0].length, teamH[0]);
 														if (teamA[1] > teamH[1]) {
 															if (match.playerData.ScoresData[k][m][scoresNa].penalties === teamA[1]) {
@@ -176,7 +185,13 @@ angular.module('worldCupScoresApp')
 												//console.log(66666666666666666);
 												if (match.playerData.ScoresData[k][m][scoresNa][teamA[0]] === teamA[1] && match.playerData.ScoresData[k][m][scoresNa][teamH[0]] === teamH[1]) {
 													console.log(77777777);
-													t.test.accurate = 1;
+													if (match.playerData.ScoresData[k][m].accurate === undefined) {
+										                match.playerData.ScoresData[k][m].accurate = 0;
+										                match.playerData.ScoresData[k][m].accurate = 1;
+										            } else {
+										                match.playerData.ScoresData[k][m].accurate = 1;
+										            }
+													//t.test.accurate = 1;
 													match.insertPoints(match.playerData.ScoresData[k][m], 3, 'finished', t.test);
 													//console.log(77777777777777777777);
 												} else if (match.playerData.ScoresData[k][m][scoresNa][teamA[0]] > match.playerData.ScoresData[k][m][scoresNa][teamH[0]] && teamA[1] > teamH[1]) {
@@ -188,10 +203,16 @@ angular.module('worldCupScoresApp')
 													match.insertPoints(match.playerData.ScoresData[k][m], 1, 'finished', t.test);
 												} else if (match.playerData.ScoresData[k][m][scoresNa][teamA[0]] === match.playerData.ScoresData[k][m][scoresNa][teamH[0]] && teamA[1] === teamH[1]) {
 													//console.log(66666666);
-													match.insertPoints(match.playerData.ScoresData[k][m], 1, 'finished', t.test);
+													if (teamA[1].length === undefined && teamH[1].length === undefined) {
+														match.insertPoints(match.playerData.ScoresData[k][m], 1, 'finished', t.test);
+													}
+
 												} else if (match.playerData.ScoresData[k][m][scoresNa][teamA[0]] === match.playerData.ScoresData[k][m][scoresNa][teamH[0]] && teamA[1] != teamH[1]) {
-													//console.log(66666666);
-													match.insertPoints(match.playerData.ScoresData[k][m], 0, 'finished', t.test);
+													//console.log(teamH[1].length, teamA[1].length);
+													if (teamA[1].length === undefined && teamH[1].length === undefined) {
+														match.insertPoints(match.playerData.ScoresData[k][m], 0, 'finished', t.test);
+													}
+
 												} else if (match.playerData.ScoresData[k][m][scoresNa][teamA[0]] > match.playerData.ScoresData[k][m][scoresNa][teamH[0]] && teamA[1] < teamH[1]) {
 													match.insertPoints(match.playerData.ScoresData[k][m], 0, 'finished', t.test);
 												} else if (match.playerData.ScoresData[k][m][scoresNa][teamA[0]] < match.playerData.ScoresData[k][m][scoresNa][teamH[0]] && teamA[1] > teamH[1]) {
@@ -255,16 +276,35 @@ angular.module('worldCupScoresApp')
 			//console.log(match.playerData);
 			const uList = document.querySelector('.logs');
 			match.getData().then(response => {
+				let numId = 1;
+				let m = false;
+				//console.log(match.playerData);
 				for (times in match.playerData['ScoresData']) {
-					console.log(response);
-					const logs = document.createElement('li');
-					logs.classList.add('logItem');
-					logs.id = match.playerData['ScoresData'][times]['1']['name'];
-					logs.innerHTML = match.playerData['ScoresData'][times]['1']['name'];
-					logs.addEventListener('click', t.playerDetails);
-					uList.appendChild(logs);
-					//console.log(1);
+					if (match.playerData['ScoresData'][times][numId] === undefined) {
+						console.log('Calc');
+						while (m === false) {
+							numId++;
+							if (match.playerData['ScoresData'][times][numId] != undefined) {
+								m = true;
+							}
+
+						}
+					}
+						const logs = document.createElement('li');
+						logs.classList.add('logItem');
+						console.log(match.playerData['ScoresData'][times]);
+						//console.log(match.playerData['ScoresData'][times][numId]);
+						console.log(numId);
+						logs.id = match.playerData['ScoresData'][times][numId]['name'];
+						logs.innerHTML = match.playerData['ScoresData'][times][numId]['name'];
+						logs.addEventListener('click', t.playerDetails);
+						uList.appendChild(logs);
+						//console.log(1);
+						numId = 1;
+
+						//console.log(numId);//console.log(response)
 				}
+
 			});
 		};
 
@@ -333,6 +373,19 @@ angular.module('worldCupScoresApp')
 
 					const ulList = document.createElement('li');
 					ulList.classList.add('infoListItemTitles');
+					const butt = document.createElement('button');
+					butt.textContent = 'Delete';
+					butt.classList.add('deleteButton');
+					butt.id = goes;
+					list.appendChild(butt);
+					butt.addEventListener('click', function(ev) {
+						const plaD = match.playerData.ScoresData[event.target.id];
+						const plaN = match.playerData.ScoresData;
+						const pl = event.target.id;
+						t.removeData(ev, plaD, plaN, pl);
+					});
+
+					console.log(match.playerData.ScoresData[event.target.id][goes]);
 
 					//console.log(objectLength.length);
 					list.classList.add('infoListItem');
@@ -359,13 +412,10 @@ angular.module('worldCupScoresApp')
 							<span class="playerData">' + resultsArray[i] + '</span></li>');
 						uList.insertBefore(list, uList.childNodes[1]);
 						uList.insertBefore(ulList, uList.childNodes[1]);
-						//uList.appendChild(ulList);
 						//uList.appendChild(list);
 						//console.log(t.winner);
 
 					}
-
-
 				}
 
 
@@ -379,6 +429,22 @@ angular.module('worldCupScoresApp')
 
 		};
 
+		this.removeData = function(el, pla, plaN, pl) {
+			console.log(el.target.id);
+			console.log(pla);
+			const id = el.target.id;
+			console.log(pla[id]);
+			delete pla[id];
+			if (Object.keys(pla).length === 0) {
+				console.log(plaN);
+				console.log(pl);
+				delete plaN[pl];
+			}
+			console.log(plaN);
+			console.log(pl);
+			console.log(match.playerData);
+			match.insertDeletion(match.playerData);
+		};
 		this.quitModal = function() {
 			const remove = document.querySelector('.modal');
 			remove.parentElement.removeChild(remove);

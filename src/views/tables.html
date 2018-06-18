@@ -12,7 +12,9 @@
 		<ul class="info-u-list">
 			<li class="insert-list-item">
 				<input list="names" ng-model="tables.test.name">
-				<datalist id="names"></datalist>
+				<datalist id="names">
+					<option ng-repeat="values in tables.datalistNames" value="{{values}}">
+				</datalist>
 			</li>
 			<li class="insert-list-item">
 				<select id="fullFirst" ng-class="{true: 'dropdown-menu'}[tables.changeClass()]" ng-model="tables.test.goalsMain[tables.test.current[0]]" ng-options="x for x in tables.numbers" >

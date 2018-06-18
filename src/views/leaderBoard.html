@@ -1,5 +1,13 @@
 <div class="leaderboardCont">
-	<ul class="leadList">
+	<div class="leadCont">
+		<ul class="namingContLead" >
+			<li class="namingLeadItem" ng-repeat="(key, value) in board.namingLead">
+				<span class="namingLeadText">{{value}}</span>
 
-	</ul>
+			</li>
+		</ul>
+		<ul class="leadList" class="leadItem" ng-repeat="(key, value) in board.groupPositions">
+			<li class="leadItem" ng-repeat="val in board.groupPositions[key] track by $index"><span class="leadText">{{val}}</span></li>
+		</ul>
+	</div>
 </div>

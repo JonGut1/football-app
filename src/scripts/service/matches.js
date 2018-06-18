@@ -68,6 +68,21 @@ angular.module('worldCupScoresApp')
                 return times;
             })
         }
+        this.getTest = function() {
+            const flag = 'Lithuania';
+            return this.matchTimes = fetch(`https://restcountries.eu/rest/v2/name/${flag}?fullText=true`, {
+                headers: header,
+            })
+            .then(response => {
+                return response.json();
+            })
+            .then(times => {
+                console.log(times);
+                return times;
+            })
+        }
+        //this.getTest();
+
         this.getMatches = function(data) {
             return this.matchTimes = fetch(data.fixtures.href, {
                 headers: header,
@@ -163,15 +178,22 @@ angular.module('worldCupScoresApp')
         };
 
         this.insertData = function(data, cont, nam) {
+            //console.log(t.playerData.General.names.indexOf(nam));
             const arr = t.playerData.General.names;
-            if(arr != undefined && arr != null) {
-                arr.push(nam);
-            } else {
+            if (arr === undefined || arr === null) {
                 t.playerData.General.names = [];
-                const ar = t.playerData.General.names;
-                ar.push(nam);
-                t.playerData.General.names = ar;
             }
+            if (t.playerData.General.names.indexOf(nam) === -1) {
+                if(arr != undefined && arr != null) {
+                    arr.push(nam);
+                } else {
+                    t.playerData.General.names = [];
+                    const ar = t.playerData.General.names;
+                    ar.push(nam);
+                    t.playerData.General.names = ar;
+                }
+            }
+
             if (data.ScoresData[cont.name] != undefined) {
                     const pastNumber = t.playerData.ScoresData[cont.name];
                     const key = Object.keys(pastNumber);
@@ -196,12 +218,6 @@ angular.module('worldCupScoresApp')
         };
         this.insertPoints = function(key, value, font, tes) {
             //console.log(tes);
-            if (key.accurate === undefined) {
-                key.accurate = 0;
-                key.accurate = tes.accurate;
-            } else {
-                key.accurate = tes.accurate;
-            }
 
             //console.log(t.playerData);
             key.points = value;
@@ -214,6 +230,16 @@ angular.module('worldCupScoresApp')
                 // response could contain the url of the newly saved file
             });
             //console.log(key);
+        };
+
+        this.insertDeletion = function(data) {
+            const newData = JSON.stringify(data);
+            jQuery.post('/src/scripts/php/insert.php', {
+                newData: newData
+            }, function(response){
+                console.log('success');
+                location.reload();
+            });
         };
 
         this.insertNames = function(nam) {
