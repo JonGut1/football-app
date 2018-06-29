@@ -11,27 +11,22 @@
 angular
   .module('worldCupScoresApp', ['ui.router'])
   .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-  	$urlRouterProvider.otherwise('/home');
+  	$urlRouterProvider.otherwise('/leaderboard');
 
   	$stateProvider
-  	.state('home', {
-  		url: '/home',
-  		templateUrl: 'views/home.html',
- 		  controller: 'HomeCtrl as home'
-  	})
-  	.state('scores', {
-  		url: '/scores',
-  		templateUrl: 'views/scores.html',
-  		controller: 'LivescoresCtrl as scores'
-  	})
-    .state('tables', {
-      url: '/tables',
-      templateUrl: 'views/tables.html',
-      controller: 'TablesCtrl as tables'
+    .state('insert', {
+      url: '/insert',
+      templateUrl: 'views/insert.html',
+      controller: 'InsertCtrl as insert'
+    })
+    .state('history', {
+      url: '/history',
+      templateUrl: 'views/history.html',
+      controller: 'HistoryCtrl as history'
     })
     .state('leaderboard', {
       url: '/leaderboard',
-      templateUrl: 'views/leaderBoard.html',
-      controller: 'LeaderBoardCtrl as board'
+      templateUrl: 'views/leaderboard.html',
+      controller: 'LeaderboardCtrl as board'
     });
   }]);

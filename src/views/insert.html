@@ -1,0 +1,47 @@
+<section class="data-add-container">
+	<nav class="nav-bar-tab">
+		<ul class="u-list">
+			<li class="list-item-tab" ui-sref="insert">Insert</li></li>
+			<li class="list-item-tab" ui-sref="history">History</li></li>
+		</ul>
+	</nav>
+	<div class="info-table">
+		<div class="matchSelect">
+			<select ng-class="{true: 'gimmick'}[insert.setAttrName()]" ng-model="insert.currentMatch" ng-options="items for items in insert.matchesSelection"></select>
+		</div>
+		<ul class="info-u-list">
+			<li class="insert-list-item">
+				<input list="names" ng-model="insert.names">
+				<datalist id="names">
+					<option ng-repeat="values in insert.dataNames" value="{{values}}">
+				</datalist>
+			</li>
+			<li class="insert-list-item">
+				<select id="fullFirst" ng-class="{true: 'dropdown-menu'}[insert.checkClass()]" ng-model="insert.fullTime[0]" ng-options="x for x in insert.numbers" >
+				</select>
+				<span>-</span>
+				<select id="fullSecond" ng-class="{true: 'dropdown-menu'}[insert.checkClass()]" ng-model="insert.fullTime[1]" ng-options="x for x in insert.numbers">
+				</select>
+			</li>
+			<li class="insert-list-item">
+				<select id="addedFirst" ng-class="{true: 'dropdown-menu'}[insert.checkClass()]" ng-model="insert.extraTime[0]" ng-options="x for x in insert.numbers">
+				</select>
+				<span>-</span>
+				<select id="addedSecond" ng-class="{true: 'dropdown-menu'}[insert.checkClass()]" ng-model="insert.extraTime[1]" ng-options="x for x in insert.numbers">
+				</select>
+			</li>
+			<li id="pen" class="insert-list-item">
+				<select id="penalties" ng-class="{true: 'dropdown-menu'}[insert.checkClass()]" ng-model="insert.penalties" ng-options="x for x in insert.currentMatch">
+				</select>
+			</li>
+			<li class="insert-list-item">
+				<div id="teamNames">
+					<span id="first" >{{insert.currentMatch[0]}}</span>
+					<span id="second">{{insert.currentMatch[1]}}</span>
+				</div>
+			</li>
+		</ul>
+		<button class="saveBtn" ng-click="insert.save()">Save</button>
+
+	</div>
+</section>
