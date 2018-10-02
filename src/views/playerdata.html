@@ -1,0 +1,24 @@
+<section class="player-data-container">
+	<button ui-sref="history">Back</button>
+	<div class="player-info-table">
+		<div>{{player.playerData[0].name}}</div>
+		<ul class="player-info" ng-repeat="data in player.playerData" id={{data.id}}>
+			<div class="tab">
+				<div>{{data.date}}</div>
+				<div>{{data.winner}}</div>
+			</div>
+			<ul class="titles">
+				<li ng-repeat="title in player.titles">{{title}}</li>
+			</ul>
+			<ul class="info">
+				<li ng-repeat="individualData in data" ng-if="$index > 0 && $index < 9 && $index !== 5 && $index !== 6">
+					{{individualData}}
+				</li>
+			</ul>
+			<div class="bottom-tab">
+				<button ng-click="player.deleteData(data.name, data.id)">Delete</button>
+				<div>{{data.points}}</div>
+			</div>
+		</ul>
+	</div>
+</section>

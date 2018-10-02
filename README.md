@@ -1,39 +1,15 @@
-# Gulp starter files
+# Football app
 
 ## Table of Contents
 
-* [Instructions](#dependencies)
+* [About](#about)
+* [Instructions](#instructions)
+
+## About
+
+This is a work in progress. The app is made using AngularJs, Javascript.
+The app uses an api to fetch football scores data. Then the data is compared with the inserted data through the app and the correct guesses are calculated.
 
 ## Instructions
 
-Before doing anything please follow the instructions in this github repository https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md.
-
-Here are all of the dependencies for the gulpfile.js that need to be insatled so that the code would be executed.
-
-npm init
-
-npm install --save-dev gulp@next
-
-npm install --save-dev gulp-sass
-
-npm install --save-dev gulp-dest
-
-npm install --save-dev gulp-autoprefixer
-
-npm install --save-dev gulp-babel
-
-npm install --save-dev gulp-babel babel-core babel-preset-env
-
-npm install --save-dev babel-plugin-transform-runtime
-
-npm install --save-dev gulp-watch
-
-npm install browser-sync gulp --save-dev
-
-npm install --save-dev gulp-browserify
-
-Installs the dependencies for letting to combine the files and to minify them.
-
-npm install --save-dev gulp-concat
-
-npm install --save-dev gulp-uglify
+The working part of the app can be accesed by navigating to the src folder in your terminal and typing php -S 127.0.0.1:8080 then in your browser, prefferably chrome type http://127.0.0.1:8080/src#!/

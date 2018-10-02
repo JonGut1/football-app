@@ -6,6 +6,12 @@
 		</ul>
 	</nav>
 	<div class="info-table">
-
+		<ul class="player-icon">
+			<li ng-repeat="players in history.playerData.playerData" ui-sref="playerdata({name: [players[0].name]})" id={{players[0].name}}>
+				<div>
+					{{players[0].name}}
+				</div>
+			</li>
+		</ul>
 	</div>
 </section>

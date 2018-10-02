@@ -28,5 +28,10 @@ angular
       url: '/leaderboard',
       templateUrl: 'views/leaderboard.html',
       controller: 'LeaderboardCtrl as board'
+    })
+    .state('playerdata', {
+      url: '/playerdata/:name',
+      templateUrl: 'views/playerdata.html',
+      controller: 'PlayerdataCtrl as player'
     });
   }]);

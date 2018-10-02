@@ -8,6 +8,9 @@
 	if ($checker === 'results') {
 		$path = '../data/results.json';
 	}
+	if ($checker === 'playerScore') {
+		$path = '../data/playerScore.json';
+	}
 	if ($checker === 'playerData') {
 		$path = '../data/playerData.json';
 	}

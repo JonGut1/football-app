@@ -13,16 +13,20 @@ angular.module('worldCupScoresApp')
 			accurate: 0,
 			status: 'pending',
 			match: [],
+			date: '',
+			id: '',
 		};
+
+		this.date = new Date();
 
 		this.currentMatch;
 		this.names;
 		this.fullTime = [];
 		this.extraTime = [];
 		this.penalties;
-		this.winner;
+		this.winner = '-';
 
-		this.numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+		this.numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 		this.dataNames;
 
 		this.matchesSelection = [];
@@ -32,7 +36,7 @@ angular.module('worldCupScoresApp')
 			const interval = setInterval(() => {
 				if (dataB.fetchedMatches === true) {
 					clearInterval(interval);
-					fetch('/src/scripts/data/allMatches.json')
+					fetch('/scripts/data/allMatches.json')
 					.then(response => response.json())
 					.then(items => {
 						console.log(items);
@@ -49,42 +53,55 @@ angular.module('worldCupScoresApp')
 
 		/* save player data on click */
 		this.save = () => {
-			const teams = `${t.currentMatch[0]} - ${t.currentMatch[1]}`
-			if (t.fullTime.length === 0) {
-				t.fullTime = '-';
-			} else if (t.fullTime[0] > t.fullTime[1]) {
-				t.winner = t.currentMatch[0];
+			if (t.currentMatch !== undefined && t.names !== undefined && t.fullTime.length >= 2) {
+				console.log('Submited.......');
+				const teams = `${t.currentMatch[0]} - ${t.currentMatch[1]}`
+				if (t.fullTime.length === 0) {
+					t.fullTime = '-';
+				} else if (t.fullTime[0] > t.fullTime[1]) {
+					t.winner = t.currentMatch[0];
+				} else {
+					t.winner = t.currentMatch[1];
+				}
+
+				if (t.extraTime.length === 0) {
+					t.extraTime = '-';
+				} else if (t.extraTime[0] > t.extraTime[1]) {
+					t.winner = t.currentMatch[0];
+				} else {
+					t.winner = t.currentMatch[1];
+				}
+
+				if (t.penalties === undefined) {
+					t.penalties = '-';
+				} else {
+					t.winner = t.penalties;
+				}
+
+				if (t.winner === undefined) {
+					t.winner = 'draw';
+				}
+
+				t.currentInput.fullTime = t.fullTime;
+				t.currentInput.extraTime = t.extraTime;
+				t.currentInput.penalties = t.penalties;
+				t.currentInput.winner = t.winner;
+				t.currentInput.match = t.currentMatch;
+				t.currentInput.name = t.names;
+				t.currentInput.date = `${this.date.getDate()}/${this.date.getMonth()}/${this.date.getFullYear()}`;
+				t.currentInput.id = t.names + t.winner + t.currentMatch[0] + t.fullTime[0] + t.extraTime[0] + t.penalties + Math.floor(Math.random() * 100);
+
+				dataB.insertPlayerData(t.currentInput);
+				dataB.insertInputNames(t.currentInput.name);
+
+				this.currentMatch = '';
+				this.fullTime = [];
+				this.extraTime = [];
+				this.penalties;
+				this.winner = '-'
 			} else {
-				t.winner = t.currentMatch[1];
+				console.log('Missing fields..........');
 			}
-
-			if (t.extraTime.length === 0) {
-				t.extraTime = '-';
-			} else if (t.extraTime[0] > t.extraTime[1]) {
-				t.winner = t.currentMatch[0];
-			} else {
-				t.winner = t.currentMatch[1];
-			}
-
-			if (t.penalties === undefined) {
-				t.penalties = '-';
-			} else {
-				t.winner = t.penalties;
-			}
-
-			if (t.winner === undefined) {
-				t.winner = 'draw';
-			}
-
-			t.currentInput.fullTime = t.fullTime;
-			t.currentInput.extraTime = t.extraTime;
-			t.currentInput.penalties = t.penalties;
-			t.currentInput.winner = t.winner;
-			t.currentInput.match = t.currentMatch;
-			t.currentInput.name = t.names;
-
-			dataB.insertPlayerData(t.currentInput);
-			dataB.insertInputNames(t.currentInput.name);
 		};
 
 		/* checks which team is selected to be the winner and adds green coloring to that team */
@@ -140,7 +157,7 @@ angular.module('worldCupScoresApp')
 		};
 
 		this.getNames = () => {
-			fetch('/src/scripts/data/inputNames.json')
+			fetch('/scripts/data/inputNames.json')
 				.then(response => response.json())
 				.then(items => {
 					$scope.$apply(() => {

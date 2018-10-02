@@ -4,8 +4,15 @@ angular.module('worldCupScoresApp')
         this.fetchedMatches = false;
         this.fetchedResults = false;
 
+        this.cachedPlayerData = null;
+
         this.results = {
             "results": {},
+        }
+        this.playerScores = {
+            "playerScores": {
+
+            }
         }
         this.playerData = {
             "playerData": {
@@ -32,6 +39,13 @@ angular.module('worldCupScoresApp')
         this.self = 'http://api.football-data.org/v1/competitions/467';
         this.teams = 'http://api.football-data.org/v1/competitions/467/teams';
 
+        fetch('/scripts/data/allMatches.json').then(response => {
+            console.log(response);
+            return response.json
+        }).then(result => {
+            console.log(result);
+        })
+
         /* fetches fixtures */
     	this.fetchAllMatches = () => {
     		fetch(t.fixtures, {
@@ -41,10 +55,13 @@ angular.module('worldCupScoresApp')
 		      return response.json();
 		    })
 		    .then(frontData => {
+                console.log(Object.keys(this.results.results).length);
                 t.insertMatches(frontData.fixtures);
                 t.insertResults(frontData.fixtures);
 		    	console.log(frontData);
-		    });
+		    }).then(i => {
+                t.compareGuesses();
+            });
         }
         t.fetchAllMatches();
 
@@ -56,7 +73,7 @@ angular.module('worldCupScoresApp')
                         t.matchesNames.allMatches.push([item.awayTeamName, item.homeTeamName]);
                     });
                     console.log(t.matchesNames);
-                    jQuery.post('/src/scripts/php/insert.php', {
+                    jQuery.post('/scripts/php/insert.php', {
                         newData: JSON.stringify(t.matchesNames),
                         checker: 'matches',
                     }, function(response){
@@ -102,7 +119,7 @@ angular.module('worldCupScoresApp')
                             };
                         }
                     });
-                    jQuery.post('/src/scripts/php/insert.php', {
+                    jQuery.post('/scripts/php/insert.php', {
                         newData: JSON.stringify(t.results),
                         checker: 'results',
                     }, function(response){
@@ -115,10 +132,44 @@ angular.module('worldCupScoresApp')
             });
         }
 
+        /* evaluates whether the guesses were correct */
+        this.compareGuesses = () => {
+            let change = null;
+            t.fetchPlayerData().then(item => {
+                let accurateAll = 0;
+                let pointsAll = 0;
+                for (items in item.playerData) {
+                    console.log(item);
+                    item.playerData[items].forEach(inst => {
+                        console.log(inst);
+                        const match = `${inst.match[0]} - ${inst.match[1]}`;
+                        console.log(angular.equals(this.results.results[match].fullTime, inst.fullTime));
+                        if (angular.equals(this.results.results[match].fullTime, inst.fullTime)) {
+                            if (this.results.results[match].extraTime[0] === '-' && inst.extraTime === '-') {
+                                accurateAll++;
+                                pointsAll += 3;
+                                inst.accurate = 1;
+                                inst.points = 3;
+                                change = true;
+                            }
+                        }
+                    });
+                }
+                this.playerData.playerData = item.playerData;
+                console.log(item.playerData);
+                console.log(this.results);
+                if (change) {
+                    console.log(item);
+                    t.insertEvaluatedPlayerData(this.playerData);
+                }
+            });
+
+        }
+
         /* check whether there are changes between the database and an api fetch */
         this.checkChange = (eval, data) => {
             if (eval === 'matches') {
-                return fetch('/src/scripts/data/allMatches.json')
+                return fetch('/scripts/data/allMatches.json')
                 .then((response) => response.json())
                 .then((obj) => {
                     for (let i = 0; i < data.length; i++) {
@@ -137,7 +188,7 @@ angular.module('worldCupScoresApp')
             }
 
             if (eval === 'results') {
-                return fetch('/src/scripts/data/results.json')
+                return fetch('/scripts/data/results.json')
                 .then((response) => response.json())
                 .then((obj) => {
                     console.log(obj);
@@ -157,11 +208,21 @@ angular.module('worldCupScoresApp')
             }
         }
 
+        /* insert calculated score */
+        this.insertPlayerScore = (data) => {
+
+        }
+
         /* inserts player data */
         this.insertPlayerData = (data) => {
             t.fetchPlayerData().then(items => {
-                items.playerData[data.name] = data;
-                jQuery.post('/src/scripts/php/insert.php', {
+
+                if (items.playerData[data.name] === undefined || items.playerData[data.name].length < 1) {
+                    items.playerData[data.name] = [];
+                }
+                items.playerData[data.name].push(data);
+
+                jQuery.post('/scripts/php/insert.php', {
                 newData: JSON.stringify(items),
                 checker: 'playerData',
                 }, function(response){
@@ -173,11 +234,58 @@ angular.module('worldCupScoresApp')
 
         };
 
+        /* inserts evaluated player data */
+        this.insertEvaluatedPlayerData = (data) => {
+            t.fetchPlayerData().then(items => {
+
+                jQuery.post('/scripts/php/insert.php', {
+                newData: JSON.stringify(data),
+                checker: 'playerData',
+                }, function(response){
+                    console.log('Player data inserted.............');
+                }).catch(err => {
+                    console.log(err, 'Failed to insert player data..............');
+                });
+            });
+
+        };
+
+        /* removes player data */
+        this.removePlayerData = (name, ids) => {
+            const idName = `#${ids}`;
+            return t.fetchPlayerData().then(data => {
+                console.log(data.playerData[name]);
+                for (let i = 0; i < data.playerData[name].length; i++) {
+                    if (data.playerData[name][i].id === ids) {
+                        if (data.playerData[name].length <= 1) {
+                            delete data.playerData[name]
+                            t.insertEvaluatedPlayerData(data);
+                            const rem = angular.element(document.querySelector(idName));
+                            const remIcon = angular.element(document.querySelector(name));
+                            console.log(rem);
+                            rem.remove();
+                            remIcon.remove();
+                            return 'go back';
+                        } else {
+                            data.playerData[name].splice(i, 1);
+                            t.insertEvaluatedPlayerData(data);
+                            const rem = angular.element(document.querySelector(idName));
+                            rem.remove();
+                        }
+                    }
+                }
+            });
+        }
+
         /* fetch player data */
         this.fetchPlayerData = () => {
-            return fetch('/src/scripts/data/playerData.json')
+            return fetch('/scripts/data/playerData.json')
             .then(response => response.json())
-            .then(items => items);
+            .then(items => {
+                console.log('fetching player data');
+                this.cachedPlayerData = items;
+                return items;
+            });
         };
 
         /* insert input name */
@@ -187,7 +295,7 @@ angular.module('worldCupScoresApp')
                     return;
                 }
                 items.inputNames.push(data);
-                jQuery.post('/src/scripts/php/insert.php', {
+                jQuery.post('/scripts/php/insert.php', {
                 newData: JSON.stringify(items),
                 checker: 'inputNames',
                 }, function(response){
@@ -200,8 +308,13 @@ angular.module('worldCupScoresApp')
 
         /* fetch input names */
         this.fetchInputNames = () => {
-            return fetch('/src/scripts/data/inputNames.json')
+            return fetch('/scripts/data/inputNames.json')
             .then(response => response.json())
             .then(items => items);
         };
+
+        this.cacheData = (data) => {
+
+        }
+
 	});
