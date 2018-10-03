@@ -6,6 +6,9 @@ angular.module('worldCupScoresApp')
   	this.titles = ['Full-Time', 'Extra-Time', 'Penalties', 'Winner', 'Status', 'Match'];
   	console.log($state);
   	this.stringConvert = (string) => {
+  		if (string === undefined) {
+  			return;
+  		}
 		const arr = string.map((item) => {
 			for (items in item) {
 				if (Array.isArray(item[items])) {
@@ -18,23 +21,15 @@ angular.module('worldCupScoresApp')
 		return arr;
 	}
 
+
+
 	this.showData = () => {
-		if (match.cachedPlayerData) {
-
-			this.playerData = t.stringConvert(match.cachedPlayerData.playerData[$stateParams.name]);
-			console.log('Old Data Inserted.........');
-			console.log(this.playerData);
-		}
-
 		match.fetchPlayerData().then(result => {
 			const results = t.stringConvert(result.playerData[$stateParams.name]);
-			console.log(angular.equals(this.playerData, results));
-			if (this.playerData && angular.equals(this.playerData, results)) {
-				return;
-			} else if (this.playerData === null || this.playerData !== results) {
+			$scope.$apply(() => {
 				this.playerData = results;
-				console.log('New Data Inserted.........');
-			}
+			});
+			console.log('New Data Inserted.........');
 		});
 	}
 
@@ -43,14 +38,12 @@ angular.module('worldCupScoresApp')
 
 
 	this.deleteData = (name, id) => {
-		match.removePlayerData(name, id).then(response => {
-			if (response === 'go back') {
-				//$state.go('history');
-				$state.reload('history');
-				//location.reload();
-			}
+		match.removePlayerData(name, id, null).then(data => {
+			const results = t.stringConvert(data.playerData[$stateParams.name]);
+			$scope.$apply(() => {
+				this.playerData = results;
+			});
 		});
-
 	}
 
   }]);

@@ -535,7 +535,7 @@ input {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 100%;
+	width: 90%;
 	height: 100%;
 	background-color: #71C451;
 	transition: 0.2s;
@@ -544,7 +544,6 @@ input {
 .player-icon li div:hover {
 	cursor: pointer;
 	transition: 0.2s;
-	transform: scale(1.1);
 	background-color: #C5E02B;
 }
 
@@ -624,4 +623,9 @@ input {
 .bottom-tab div {
 	margin-left: 1em;
 	margin-right: 1em;
+}
+
+.player-icon li button {
+	width: 10%;
+	height: 100%;
 }

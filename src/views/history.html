@@ -7,8 +7,9 @@
 	</nav>
 	<div class="info-table">
 		<ul class="player-icon">
-			<li ng-repeat="players in history.playerData.playerData" ui-sref="playerdata({name: [players[0].name]})" id={{players[0].name}}>
-				<div>
+			<li ng-repeat="players in history.playerData.playerData" id={{players[0].name}}>
+				<button ng-click="history.remove(players[0].name, players[0].id)">Delete</button>
+				<div class="nameIcon" ui-sref="playerdata({name: [players[0].name]})">
 					{{players[0].name}}
 				</div>
 			</li>
