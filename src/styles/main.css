@@ -522,7 +522,8 @@ input {
 	padding: 0;
 	display: flex;
 	overflow-y: auto;
-	justify-content: center;
+	flex-direction: column;
+	align-items: center;
 }
 
 .player-icon li {
@@ -564,6 +565,46 @@ input {
 	list-style-type: none;
 	border-top: 1px solid silver;
 	border-bottom: 1px solid silver;
+}
+
+.titles[color="green"] {
+	background-color: #B8FFA5;
+}
+
+.info[color="green"] {
+	background-color: #B8FFA5;
+}
+
+.titles[color="orange"] {
+	background-color: #FFDAA5;
+}
+
+.info[color="orange"] {
+	background-color: #FFDAA5;
+}
+
+.titles[color="yellow"] {
+	background-color: #FAFFA5;
+}
+
+.info[color="yellow"] {
+	background-color: #FAFFA5;
+}
+
+.titles[color="red"] {
+	background-color: #FFA5A5;
+}
+
+.info[color="red"] {
+	background-color: #FFA5A5;
+}
+
+.titles[color="white"] {
+	background-color: white;
+}
+
+.info[color="white"] {
+	background-color: white;
 }
 
 .titles {

@@ -60,7 +60,7 @@ angular.module('worldCupScoresApp')
                 t.insertResults(frontData.fixtures);
 		    	console.log(frontData);
 		    }).then(i => {
-                t.compareGuesses();
+                t.compareGuesses(null);
             });
         }
         t.fetchAllMatches();
@@ -94,28 +94,50 @@ angular.module('worldCupScoresApp')
                         let fullTimeSc;
                         let extraTimeSc;
                         let penaltiesSc;
+                        let outcome;
                         if (item.status === 'FINISHED') {
                             const name = `${item.awayTeamName} - ${item.homeTeamName}`
                             if (item.result.goalsAwayTeam !== undefined) {
+                                if (item.result.goalsAwayTeam > item.result.goalsHomeTeam) {
+                                    outcome = item.awayTeamName;
+                                } else if (item.result.goalsAwayTeam < item.result.goalsHomeTeam) {
+                                    outcome = item.homeTeamName;
+                                } else if (item.result.goalsAwayTeam === item.result.goalsHomeTeam) {
+                                    outcome = 'Draw';
+                                }
                                 fullTimeSc = [item.result.goalsAwayTeam, item.result.goalsHomeTeam];
                             } else {
                                 fullTimeSc = ['-', '-'];
                             }
                             if (item.result.extraTime !== undefined) {
+                                if (item.result.extraTime.goalsAwayTeam > item.result.extraTime.goalsHomeTeam) {
+                                    outcome = item.awayTeamName;
+                                } else if (item.result.extraTime.goalsAwayTeam < item.result.extraTime.goalsHomeTeam) {
+                                    outcome = item.homeTeamName;
+                                } else if (item.result.extraTime.goalsAwayTeam === item.result.extraTime.goalsHomeTeam) {
+                                    outcome = 'Draw';
+                                }
                                 extraTimeSc = [item.result.extraTime.goalsAwayTeam, item.result.extraTime.goalsHomeTeam];
                             } else {
                                 extraTimeSc = ['-', '-'];
                             }
                             if (item.result.penaltyShootout !== undefined) {
-                                penaltiesSc = [item.result.penaltyShootout.goalsAwayTeam, item.result.penaltyShootout.goalsHomeTeam];
+                                if (item.result.penaltyShootout.goalsAwayTeam > item.result.penaltyShootout.goalsHomeTeam) {
+                                    penaltiesSc = item.awayTeamName;
+                                    outcome = item.awayTeamName;
+                                } else if (item.result.penaltyShootout.goalsAwayTeam < item.result.penaltyShootout.goalsHomeTeam) {
+                                    penaltiesSc = item.homeTeamName;
+                                    outcome = item.homeTeamName;
+                                }
                             } else {
-                                penaltiesSc = ['-', '-'];
+                                penaltiesSc = '-';
                             }
 
                             t.results.results[name] = {
                                 fullTime: fullTimeSc,
                                 extraTime: extraTimeSc,
                                 penalties: penaltiesSc,
+                                outcome: outcome,
                             };
                         }
                     });
@@ -133,37 +155,121 @@ angular.module('worldCupScoresApp')
         }
 
         /* evaluates whether the guesses were correct */
-        this.compareGuesses = () => {
-            let change = null;
-            t.fetchPlayerData().then(item => {
-                let accurateAll = 0;
-                let pointsAll = 0;
-                for (items in item.playerData) {
-                    console.log(item);
-                    item.playerData[items].forEach(inst => {
-                        console.log(inst);
-                        const match = `${inst.match[0]} - ${inst.match[1]}`;
-                        console.log(angular.equals(this.results.results[match].fullTime, inst.fullTime));
-                        if (angular.equals(this.results.results[match].fullTime, inst.fullTime)) {
-                            if (this.results.results[match].extraTime[0] === '-' && inst.extraTime === '-') {
-                                accurateAll++;
-                                pointsAll += 3;
-                                inst.accurate = 1;
-                                inst.points = 3;
-                                change = true;
-                            }
-                        }
-                    });
-                }
-                this.playerData.playerData = item.playerData;
-                console.log(item.playerData);
-                console.log(this.results);
-                if (change) {
-                    console.log(item);
-                    t.insertEvaluatedPlayerData(this.playerData);
-                }
-            });
+        this.compareGuesses = (data) => {
+            if (data) {
+                const da = {};
+                da.playerData = {};
+                da.playerData[data.name] = [];
+                da.playerData[data.name].push(data);
+                t.evaluateData(da, null);
+                return data;
+            }
 
+            t.fetchPlayerData().then(item => {
+                t.evaluateData(item, true);
+            });
+        }
+
+        this.evaluateData = (data, action) => {
+            let accurateAll = 0;
+            let pointsAll = 0;
+            console.log(data);
+            for (datas in data.playerData) {
+                data.playerData[datas].forEach(inst => {
+                    const match = `${inst.match[0]} - ${inst.match[1]}`;
+                    console.log(this.results.results[match]);
+                    console.log(inst);
+                    if (inst.status === 'PENDING' && this.results.results[match]) {
+                        inst.outcome = this.results.results[match].outcome;
+                        if (t.checkOutcomes(inst, 'fullTime') === 'Stop') {
+                            return;
+                        } else if (t.checkOutcomes(inst, 'fullTime') === 'Accurate') {
+                            inst.points += 3;
+                            inst.color = 'green';
+                            if (t.checkOutcomes(inst, 'extraTime') === 'Inaccurate') {
+                                inst.color = 'orange';
+                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Semi Accurate') {
+                                inst.points += 1;
+                                inst.color = 'yellow';
+                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                    inst.points += 1;
+                                    inst.color = 'yellow';
+                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                    inst.color = 'orange';
+                                }
+                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Accurate') {
+                                inst.points += 3;
+                                inst.color = 'green';
+                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                    inst.points += 1;
+                                    inst.color = 'green';
+                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                    inst.color = 'orange';
+                                }
+                            }
+                        } else if (t.checkOutcomes(inst, 'fullTime') === 'Semi Accurate') {
+                            inst.points += 1;
+                            inst.color = 'yellow';
+                            if (t.checkOutcomes(inst, 'extraTime') === 'Inaccurate') {
+                                inst.color = 'orange';
+                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Semi Accurate') {
+                                inst.points += 1;
+                                inst.color = 'yellow';
+                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                    inst.points += 1;
+                                    inst.color = 'yellow';
+                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                    inst.color = 'orange';
+                                }
+                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Accurate') {
+                                inst.points += 3;
+                                inst.color = 'yellow';
+                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                    inst.points += 1;
+                                    inst.color = 'yellow';
+                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                    console.log('penalties............');
+                                    inst.color = 'orange';
+                                }
+                            }
+                        } else if (t.checkOutcomes(inst, 'fullTime') === 'Inaccurate') {
+                            inst.color = 'red';
+                        }
+                        inst.status = 'FINISHED';
+                    }
+                });
+            }
+            this.playerData.playerData = data.playerData;
+            console.log(data.playerData);
+            console.log(this.results);
+            if (action) {
+                console.log(data);
+                t.insertEvaluatedPlayerData(this.playerData);
+            }
+        }
+
+        /* evaluate the resulta based on fulltime extratime and penalties */
+        this.checkOutcomes = (inst, type) => {
+            const match = `${inst.match[0]} - ${inst.match[1]}`;
+            if (type === 'penalties') {
+                if (this.results.results[match][type] === '-') {
+                    return 'Stop';
+                }
+                else if (this.results.results[match][type] === inst[type]) {
+                    return 'Accurate';
+                } else if (this.results.results[match][type] !== inst[type]) {
+                    return 'Inaccurate';
+                }
+            }
+            if (this.results.results[match][type][0] === '-') {
+                return 'Stop';
+            } else if (angular.equals(this.results.results[match][type], inst[type])) {
+                return 'Accurate';
+            } else if (this.results.results[match][type][0] > this.results.results[match][type][1] && inst[type][0] > inst[type][1] || this.results.results[match][type][0] < this.results.results[match][type][1] && inst[type][0] < inst[type][1] || this.results.results[match][type][0] === this.results.results[match][type][1] && inst[type][0] === inst[type][1]) {
+                return 'Semi Accurate';
+            } else {
+                return 'Inaccurate';
+            }
         }
 
         /* check whether there are changes between the database and an api fetch */
@@ -215,12 +321,13 @@ angular.module('worldCupScoresApp')
 
         /* inserts player data */
         this.insertPlayerData = (data) => {
+            const dat = t.compareGuesses(data);
             t.fetchPlayerData().then(items => {
 
-                if (items.playerData[data.name] === undefined || items.playerData[data.name].length < 1) {
-                    items.playerData[data.name] = [];
+                if (items.playerData[dat.name] === undefined || items.playerData[dat.name].length < 1) {
+                    items.playerData[dat.name] = [];
                 }
-                items.playerData[data.name].push(data);
+                items.playerData[dat.name].push(dat);
 
                 jQuery.post('/scripts/php/insert.php', {
                 newData: JSON.stringify(items),
@@ -251,27 +358,31 @@ angular.module('worldCupScoresApp')
         };
 
         /* removes player data */
-        this.removePlayerData = (name, ids) => {
+        this.removePlayerData = (name, ids, all) => {
             const idName = `#${ids}`;
             return t.fetchPlayerData().then(data => {
-                console.log(data.playerData[name]);
+                if (all) {
+                    if (data.playerData[name][0].id === ids) {
+                        delete data.playerData[name]
+                        t.insertEvaluatedPlayerData(data);
+                        console.log('Player data deleted.........');
+                        return data;
+                    }
+                }
+                if (data.playerData[name].length <= 1) {
+                    console.log(123131231312);
+                    data.playerData[name].splice(0, 1);
+                    delete data.playerData[name]
+                    t.insertEvaluatedPlayerData(data);
+                    console.log('Player data deleted.........');
+                    return data;
+                }
                 for (let i = 0; i < data.playerData[name].length; i++) {
                     if (data.playerData[name][i].id === ids) {
-                        if (data.playerData[name].length <= 1) {
-                            delete data.playerData[name]
-                            t.insertEvaluatedPlayerData(data);
-                            const rem = angular.element(document.querySelector(idName));
-                            const remIcon = angular.element(document.querySelector(name));
-                            console.log(rem);
-                            rem.remove();
-                            remIcon.remove();
-                            return 'go back';
-                        } else {
                             data.playerData[name].splice(i, 1);
                             t.insertEvaluatedPlayerData(data);
-                            const rem = angular.element(document.querySelector(idName));
-                            rem.remove();
-                        }
+                            console.log('Player data deleted.........');
+                            return data;
                     }
                 }
             });
@@ -284,9 +395,15 @@ angular.module('worldCupScoresApp')
             .then(items => {
                 console.log('fetching player data');
                 this.cachedPlayerData = items;
+                this.leaderboardSort(items);
                 return items;
             });
         };
+
+        /* sort the places of players based on there score */
+        this.leaderboardSort = (data) => {
+
+        }
 
         /* insert input name */
         this.insertInputNames = (data) => {
@@ -316,5 +433,4 @@ angular.module('worldCupScoresApp')
         this.cacheData = (data) => {
 
         }
-
 	});

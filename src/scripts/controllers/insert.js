@@ -6,15 +6,16 @@ angular.module('worldCupScoresApp')
 			name: '',
 			fullTime: [],
 			extraTime: [],
-			penalties: [],
 			penalties: '-',
 			winner: '-',
 			points: 0,
 			accurate: 0,
-			status: 'pending',
+			status: 'PENDING',
 			match: [],
 			date: '',
 			id: '',
+			color: 'white',
+			outcome: 'Not Known',
 		};
 
 		this.date = new Date();
@@ -58,18 +59,10 @@ angular.module('worldCupScoresApp')
 				const teams = `${t.currentMatch[0]} - ${t.currentMatch[1]}`
 				if (t.fullTime.length === 0) {
 					t.fullTime = '-';
-				} else if (t.fullTime[0] > t.fullTime[1]) {
-					t.winner = t.currentMatch[0];
-				} else {
-					t.winner = t.currentMatch[1];
 				}
 
 				if (t.extraTime.length === 0) {
 					t.extraTime = '-';
-				} else if (t.extraTime[0] > t.extraTime[1]) {
-					t.winner = t.currentMatch[0];
-				} else {
-					t.winner = t.currentMatch[1];
 				}
 
 				if (t.penalties === undefined) {
@@ -78,9 +71,7 @@ angular.module('worldCupScoresApp')
 					t.winner = t.penalties;
 				}
 
-				if (t.winner === undefined) {
-					t.winner = 'draw';
-				}
+				this.checkClass();
 
 				t.currentInput.fullTime = t.fullTime;
 				t.currentInput.extraTime = t.extraTime;
@@ -93,16 +84,41 @@ angular.module('worldCupScoresApp')
 
 				dataB.insertPlayerData(t.currentInput);
 				dataB.insertInputNames(t.currentInput.name);
-
+				console.log(this.winner, this.currentInput);
 				this.currentMatch = '';
 				this.fullTime = [];
 				this.extraTime = [];
 				this.penalties;
 				this.winner = '-'
+
+				this.currentInput = {
+					name: '',
+					fullTime: [],
+					extraTime: [],
+					penalties: '-',
+					winner: '-',
+					points: 0,
+					accurate: 0,
+					status: 'PENDING',
+					match: [],
+					date: '',
+					id: '',
+					color: 'white',
+					outcome: 'Not Known',
+				};
+
+				this.removeAttr();
 			} else {
 				console.log('Missing fields..........');
 			}
 		};
+
+		this.removeAttr = () => {
+			const firstTeam = document.querySelector('#first');
+			const secondTeam = document.querySelector('#second');
+			firstTeam.removeAttribute('winner', '');
+			secondTeam.removeAttribute('winner', '');
+		}
 
 		/* checks which team is selected to be the winner and adds green coloring to that team */
 		this.checkClass = () => {
@@ -116,14 +132,17 @@ angular.module('worldCupScoresApp')
 
 			if (t.fullTime.length > 1) {
 				if (t.fullTime[0] === t.fullTime[1]) {
+				t.winner = 'draw';
 				firstTeam.removeAttribute('winner', '');
 				secondTeam.removeAttribute('winner', '');
 				}
 				if (t.fullTime[0] > t.fullTime[1]) {
+					t.winner = firstTeam.textContent;
 					firstTeam.setAttribute('winner', '');
 					secondTeam.removeAttribute('winner', '');
 				}
 				if (t.fullTime[0] < t.fullTime[1]) {
+					t.winner = secondTeam.textContent;
 					firstTeam.removeAttribute('winner', '');
 					secondTeam.setAttribute('winner', '');
 				}
@@ -131,14 +150,17 @@ angular.module('worldCupScoresApp')
 
 			if (t.extraTime.length > 1) {
 				if (t.extraTime[0] === t.extraTime[1]) {
+					t.winner = 'draw';
 					firstTeam.removeAttribute('winner', '');
 					secondTeam.removeAttribute('winner', '');
 				}
 				if (t.extraTime[0] > t.extraTime[1]) {
+					t.winner = firstTeam.textContent;
 					firstTeam.setAttribute('winner', '');
 					secondTeam.removeAttribute('winner', '');
 				}
 				if (t.extraTime[0] < t.extraTime[1]) {
+					t.winner = secondTeam.textContent;
 					firstTeam.removeAttribute('winner', '');
 					secondTeam.setAttribute('winner', '');
 				}
@@ -146,10 +168,12 @@ angular.module('worldCupScoresApp')
 
 			if (t.penalties !== undefined) {
 				if (t.penalties === t.currentMatch[0]) {
+					t.winner = firstTeam.textContent;
 					firstTeam.setAttribute('winner', '');
 					secondTeam.removeAttribute('winner', '');
 				}
 				if (t.penalties === t.currentMatch[1]) {
+					t.winner = secondTeam.textContent;
 					firstTeam.removeAttribute('winner', '');
 					secondTeam.setAttribute('winner', '');
 				}

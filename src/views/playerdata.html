@@ -4,13 +4,13 @@
 		<div>{{player.playerData[0].name}}</div>
 		<ul class="player-info" ng-repeat="data in player.playerData" id={{data.id}}>
 			<div class="tab">
-				<div>{{data.date}}</div>
-				<div>{{data.winner}}</div>
+				<div>Date added - {{data.date}}</div>
+				<div>Ending - {{data.outcome}}</div>
 			</div>
-			<ul class="titles">
+			<ul class="titles" color={{data.color}}>
 				<li ng-repeat="title in player.titles">{{title}}</li>
 			</ul>
-			<ul class="info">
+			<ul class="info" color={{data.color}}>
 				<li ng-repeat="individualData in data" ng-if="$index > 0 && $index < 9 && $index !== 5 && $index !== 6">
 					{{individualData}}
 				</li>
