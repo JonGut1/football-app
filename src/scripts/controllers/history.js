@@ -11,8 +11,6 @@ angular.module('worldCupScoresApp')
 				$scope.$apply(() => {
 					this.playerData = data;
 				});
-
-					console.log(this.playerData);
 					console.log('New Data Inserted..........');
 			});
 		}

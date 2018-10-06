@@ -8,8 +8,8 @@
 	if ($checker === 'results') {
 		$path = '../data/results.json';
 	}
-	if ($checker === 'playerScore') {
-		$path = '../data/playerScore.json';
+	if ($checker === 'playerResults') {
+		$path = '../data/playerResults.json';
 	}
 	if ($checker === 'playerData') {
 		$path = '../data/playerData.json';

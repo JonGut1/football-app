@@ -40,7 +40,6 @@ angular.module('worldCupScoresApp')
 					fetch('/scripts/data/allMatches.json')
 					.then(response => response.json())
 					.then(items => {
-						console.log(items);
 						items.allMatches.forEach(it => {
 							$scope.$apply(() => {
 								t.matchesSelection.push(it);
@@ -84,7 +83,6 @@ angular.module('worldCupScoresApp')
 
 				dataB.insertPlayerData(t.currentInput);
 				dataB.insertInputNames(t.currentInput.name);
-				console.log(this.winner, this.currentInput);
 				this.currentMatch = '';
 				this.fullTime = [];
 				this.extraTime = [];

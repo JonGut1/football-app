@@ -14,6 +14,11 @@ angular.module('worldCupScoresApp')
 
             }
         }
+        this.playerResults = {
+            "playerResults": {
+
+            }
+        }
         this.playerData = {
             "playerData": {
 
@@ -40,7 +45,6 @@ angular.module('worldCupScoresApp')
         this.teams = 'http://api.football-data.org/v1/competitions/467/teams';
 
         fetch('/scripts/data/allMatches.json').then(response => {
-            console.log(response);
             return response.json
         }).then(result => {
             console.log(result);
@@ -52,13 +56,13 @@ angular.module('worldCupScoresApp')
 	      		headers: t.header,
 		    })
 		    .then(response => {
+                console.log(response);
 		      return response.json();
 		    })
 		    .then(frontData => {
-                console.log(Object.keys(this.results.results).length);
+
                 t.insertMatches(frontData.fixtures);
                 t.insertResults(frontData.fixtures);
-		    	console.log(frontData);
 		    }).then(i => {
                 t.compareGuesses(null);
             });
@@ -72,7 +76,6 @@ angular.module('worldCupScoresApp')
                     data.forEach((item) => {
                         t.matchesNames.allMatches.push([item.awayTeamName, item.homeTeamName]);
                     });
-                    console.log(t.matchesNames);
                     jQuery.post('/scripts/php/insert.php', {
                         newData: JSON.stringify(t.matchesNames),
                         checker: 'matches',
@@ -161,91 +164,108 @@ angular.module('worldCupScoresApp')
                 da.playerData = {};
                 da.playerData[data.name] = [];
                 da.playerData[data.name].push(data);
-                t.evaluateData(da, null);
+                t.evaluateData(da, null).then(response => {
+                    t.sortScores(this.playerScores)
+                }).catch(err => {
+                    console.log('Empty database........');
+                });
                 return data;
             }
 
             t.fetchPlayerData().then(item => {
-                t.evaluateData(item, true);
+                t.evaluateData(item, true).then(response => {
+                    t.sortScores(this.playerScores);
+                }).catch(err => {
+                    console.log('Empty database........');
+                });
             });
         }
 
         this.evaluateData = (data, action) => {
-            let accurateAll = 0;
-            let pointsAll = 0;
-            console.log(data);
-            for (datas in data.playerData) {
-                data.playerData[datas].forEach(inst => {
-                    const match = `${inst.match[0]} - ${inst.match[1]}`;
-                    console.log(this.results.results[match]);
-                    console.log(inst);
-                    if (inst.status === 'PENDING' && this.results.results[match]) {
-                        inst.outcome = this.results.results[match].outcome;
-                        if (t.checkOutcomes(inst, 'fullTime') === 'Stop') {
-                            return;
-                        } else if (t.checkOutcomes(inst, 'fullTime') === 'Accurate') {
-                            inst.points += 3;
-                            inst.color = 'green';
-                            if (t.checkOutcomes(inst, 'extraTime') === 'Inaccurate') {
-                                inst.color = 'orange';
-                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Semi Accurate') {
-                                inst.points += 1;
-                                inst.color = 'yellow';
-                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
-                                    inst.points += 1;
-                                    inst.color = 'yellow';
-                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
-                                    inst.color = 'orange';
-                                }
-                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Accurate') {
+            return new Promise((resolve, reject) => {
+                const scores = {};
+                for (datas in data.playerData) {
+                    data.playerData[datas].forEach(inst => {
+                        const match = `${inst.match[0]} - ${inst.match[1]}`;
+
+                        if (inst.status === 'PENDING' && this.results.results[match]) {
+                            inst.outcome = this.results.results[match].outcome;
+                            if (t.checkOutcomes(inst, 'fullTime') === 'Stop') {
+                                return;
+                            } else if (t.checkOutcomes(inst, 'fullTime') === 'Accurate') {
+                                inst.accurate = 1;
                                 inst.points += 3;
                                 inst.color = 'green';
-                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
-                                    inst.points += 1;
-                                    inst.color = 'green';
-                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                if (t.checkOutcomes(inst, 'extraTime') === 'Stop') {
+                                    inst.accurate = 1;
+                                } else if (t.checkOutcomes(inst, 'extraTime') === 'Inaccurate') {
+                                    inst.accurate = 0;
                                     inst.color = 'orange';
+                                } else if (t.checkOutcomes(inst, 'extraTime') === 'Semi Accurate') {
+                                    inst.accurate = 0;
+                                    inst.points += 1;
+                                    inst.color = 'yellow';
+                                    if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                        inst.points += 1;
+                                        inst.color = 'yellow';
+                                    } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                        inst.color = 'orange';
+                                    }
+                                } else if (t.checkOutcomes(inst, 'extraTime') === 'Accurate') {
+                                    inst.points += 3;
+                                    inst.accurate = 1;
+                                    inst.color = 'green';
+                                    if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                        inst.points += 1;
+                                        inst.accurate = 1;
+                                        inst.color = 'green';
+                                    } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                        inst.accurate = 0;
+                                        inst.color = 'orange';
+                                    }
                                 }
-                            }
-                        } else if (t.checkOutcomes(inst, 'fullTime') === 'Semi Accurate') {
-                            inst.points += 1;
-                            inst.color = 'yellow';
-                            if (t.checkOutcomes(inst, 'extraTime') === 'Inaccurate') {
-                                inst.color = 'orange';
-                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Semi Accurate') {
+                            } else if (t.checkOutcomes(inst, 'fullTime') === 'Semi Accurate') {
                                 inst.points += 1;
                                 inst.color = 'yellow';
-                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                if (t.checkOutcomes(inst, 'extraTime') === 'Inaccurate') {
+                                    inst.color = 'orange';
+                                } else if (t.checkOutcomes(inst, 'extraTime') === 'Semi Accurate') {
                                     inst.points += 1;
                                     inst.color = 'yellow';
-                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
-                                    inst.color = 'orange';
-                                }
-                            } else if (t.checkOutcomes(inst, 'extraTime') === 'Accurate') {
-                                inst.points += 3;
-                                inst.color = 'yellow';
-                                if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
-                                    inst.points += 1;
+                                    if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                        inst.points += 1;
+                                        inst.color = 'yellow';
+                                    } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                        inst.color = 'orange';
+                                    }
+                                } else if (t.checkOutcomes(inst, 'extraTime') === 'Accurate') {
+                                    inst.points += 3;
                                     inst.color = 'yellow';
-                                } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
-                                    console.log('penalties............');
-                                    inst.color = 'orange';
+                                    if (t.checkOutcomes(inst, 'penalties') === 'Accurate') {
+                                        inst.points += 1;
+                                        inst.color = 'yellow';
+                                    } else if (t.checkOutcomes(inst, 'penalties') === 'Inaccurate') {
+                                        inst.color = 'orange';
+                                    }
                                 }
+                            } else if (t.checkOutcomes(inst, 'fullTime') === 'Inaccurate') {
+                                inst.color = 'red';
                             }
-                        } else if (t.checkOutcomes(inst, 'fullTime') === 'Inaccurate') {
-                            inst.color = 'red';
+                            inst.status = 'FINISHED';
                         }
-                        inst.status = 'FINISHED';
-                    }
-                });
-            }
-            this.playerData.playerData = data.playerData;
-            console.log(data.playerData);
-            console.log(this.results);
-            if (action) {
-                console.log(data);
-                t.insertEvaluatedPlayerData(this.playerData);
-            }
+                        t.sumScores(inst);
+                    });
+                }
+
+                this.playerData.playerData = data.playerData;
+                if (action) {
+                    t.insertEvaluatedPlayerData(this.playerData);
+                }
+                if (Object.keys(this.playerData.playerData).length === 0) {
+                    reject();
+                }
+                resolve('Evaluated');
+            });
         }
 
         /* evaluate the resulta based on fulltime extratime and penalties */
@@ -297,7 +317,6 @@ angular.module('worldCupScoresApp')
                 return fetch('/scripts/data/results.json')
                 .then((response) => response.json())
                 .then((obj) => {
-                    console.log(obj);
                     for (let i = 0; i < data.length; i++) {
                         if (obj[i] === undefined || obj[i].goalsAwayTeam === undefined) {
                             return true;
@@ -312,11 +331,6 @@ angular.module('worldCupScoresApp')
                     fetchedResults = true;
                 });
             }
-        }
-
-        /* insert calculated score */
-        this.insertPlayerScore = (data) => {
-
         }
 
         /* inserts player data */
@@ -370,7 +384,6 @@ angular.module('worldCupScoresApp')
                     }
                 }
                 if (data.playerData[name].length <= 1) {
-                    console.log(123131231312);
                     data.playerData[name].splice(0, 1);
                     delete data.playerData[name]
                     t.insertEvaluatedPlayerData(data);
@@ -395,13 +408,163 @@ angular.module('worldCupScoresApp')
             .then(items => {
                 console.log('fetching player data');
                 this.cachedPlayerData = items;
-                this.leaderboardSort(items);
                 return items;
             });
         };
 
         /* sort the places of players based on there score */
-        this.leaderboardSort = (data) => {
+        this.sumScores = (inst) => {
+            if (this.playerScores.playerScores[inst.name] === undefined) {
+                this.playerScores.playerScores[inst.name] = {};
+                this.playerScores.playerScores[inst.name].place = '';
+                this.playerScores.playerScores[inst.name].name = inst.name;
+                this.playerScores.playerScores[inst.name].points = inst.points;
+                this.playerScores.playerScores[inst.name].accurate = inst.accurate;
+            } else {
+                this.playerScores.playerScores[inst.name].points += inst.points;
+                this.playerScores.playerScores[inst.name].accurate += inst.accurate;
+            }
+            console.log('Sumed the scores.........');
+        }
+
+        /* sorts the scores into the correct rankings */
+        this.sortScores = (data) => {
+            const scores = {
+                equals: {},
+                biggest: {},
+                biggestArr: [],
+                equalsArr: [],
+                biggestArrSorted: [],
+                final: {},
+            }
+
+            for (names in data.playerScores) {
+                if (scores.biggest[data.playerScores[names].points] === undefined) {
+                    scores.biggest[data.playerScores[names].points] = {};
+                    scores.biggestArr.push(data.playerScores[names].points);
+                    scores.biggest[data.playerScores[names].points][names] = data.playerScores[names];
+                } else {
+                    scores.biggest[data.playerScores[names].points][names] = data.playerScores[names];
+                }
+            }
+
+
+            t.getMaxNum(scores).then(response => {
+                this.playerResults.playerResults = response;
+                t.insertPlayerResults(response);
+            });
+
+        }
+
+        this.insertPlayerResults = (data) => {
+            const ins = {};
+            ins.playerResults = data;
+            jQuery.post('/scripts/php/insert.php', {
+                newData: JSON.stringify(ins),
+                checker: 'playerResults',
+            }, function(response){
+                console.log('Player results inserted.............');
+            }).catch(err => {
+                console.log(err, 'Failed to insert player results..............');
+            });
+        }
+
+        this.getMaxNum = (data) => {
+            return new Promise((resolve) => {
+                let count = 0;
+                const final = [];
+                const int = setInterval(() => {
+                    const max = Math.max(...data.biggestArr);
+                    if (data.biggestArrSorted.indexOf(max) === -1) {
+                        if (Object.keys(data.biggest[max]).length > 1) {
+                            const acc = [];
+                            const accCopy = [];
+                            const nam = {};
+                            for (keys in data.biggest[max]) {
+                                const num = data.biggest[max][keys].points + data.biggest[max][keys].points;
+                                if (nam[num] === undefined) {
+                                    nam[num] = {};
+                                    nam[num][keys] = data.biggest[max][keys];
+                                } else {
+                                    nam[num][keys] = data.biggest[max][keys];
+                                }
+                                if (acc.indexOf(num === -1)) {
+                                    acc.push(num);
+                                    accCopy.push(num);
+                                }
+                            }
+                            for (key in nam) {
+                                let pla;
+                                const maxEquals = Math.max(...acc);
+                                for (ke in nam[maxEquals]) {
+                                    let placeNaming = '';
+                                    let placeNaming2 = '';
+                                    pla = (count + Object.keys(nam[maxEquals]).length);
+                                        if (count + 1 === 1) {
+                                            placeNaming = 'st';
+                                        } else if (count + 1 === 2) {
+                                            placeNaming = 'nd';
+                                        } else if (count + 1 === 3) {
+                                            placeNaming = 'rd';
+                                        } else {
+                                            placeNaming = 'th';
+                                        }
+
+                                        if (pla === 1) {
+                                            placeNaming2 = 'st';
+                                        } else if (pla === 2) {
+                                            placeNaming2 = 'nd';
+                                        } else if (pla === 3) {
+                                            placeNaming2 = 'rd';
+                                        } else {
+                                            placeNaming2 = 'th';
+                                        }
+
+                                        nam[maxEquals][ke].place = `${count + 1}${placeNaming} - ${pla}${placeNaming2}`;
+
+                                    const obj = {
+                                        [ke]: nam[maxEquals][ke],
+                                    }
+
+                                    final.push(obj);
+                                }
+                                count += (pla - 1);
+                                const index = acc.indexOf(max);
+                                acc.splice(index, 1);
+
+                            }
+
+                        } else {
+                            let placeNaming = '';
+                            count++
+                            if (count === 1) {
+                                placeNaming = 'st';
+                            } else if (count === 2) {
+                                placeNaming = 'nd';
+                            } else if (count === 3) {
+                                placeNaming = 'rd';
+                            } else {
+                                placeNaming = 'th';
+                            }
+                            data.biggest[max][Object.keys(data.biggest[max])].place = `${count}${placeNaming}`;
+                            final.push(data.biggest[max]);
+                            data.biggestArrSorted.push(max);
+                        }
+
+                    }
+                    const index = data.biggestArr.indexOf(max);
+                    data.biggestArr.splice(index, 1);
+                        if (data.biggestArr.length === 0) {
+                            clearInterval(int);
+                            resolve(final);
+                        }
+                },100);
+            });
+
+        }
+
+        /* insert calculated scores into the database */
+        this.insertPlayerScores = () => {
 
         }
 
@@ -426,6 +589,13 @@ angular.module('worldCupScoresApp')
         /* fetch input names */
         this.fetchInputNames = () => {
             return fetch('/scripts/data/inputNames.json')
+            .then(response => response.json())
+            .then(items => items);
+        };
+
+        /* fetch player results */
+        this.fetchPlayerResults = () => {
+            return fetch('/scripts/data/playerResults.json')
             .then(response => response.json())
             .then(items => items);
         };
