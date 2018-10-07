@@ -1,9 +1,26 @@
 angular.module('worldCupScoresApp')
   .controller('LeaderboardCtrl', ['dataStore', '$scope', function(match, $scope) {
-  	console.log(match.cachedPlayerData);
+  	const t = this;
+  	this.playerLeaderboard;
+  	this.playerLeadArrLength = [];
+  	this.namingLead = ['Position', 'Name', 'Points', 'Accurate'];
 
-  	match.fetchPlayerResults().then(data =>{
-  		console.log(data);
-  	});
+  	this.showLeaderboard = () => {
+  		match.fetchPlayerResults().then(data =>{
+  			const arr = [];
+  			this.playerLeadArrLength = Object.keys(data.playerResults).length;
+  			for (let i = 0; i < Object.keys(data.playerResults).length; i++) {
+  				arr.push(i);
+  			}
+  			console.log(arr);
+  			$scope.$apply(() => {
+  				this.playerLeadArrLength = arr;
+  				t.playerLeaderboard = data.playerResults;
+  			});
+  			console.log(t.playerLeaderboard);
+  		});
+  	}
+
+  	t.showLeaderboard();
 
   }]);

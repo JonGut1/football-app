@@ -670,3 +670,23 @@ input {
 	width: 10%;
 	height: 100%;
 }
+
+.position[color="Gold"] {
+	background-color: #FFEE81;
+}
+
+.position[color="Silver"] {
+	background-color: #F2F2F2;
+}
+
+.position[color="Bronze"] {
+	background-color: #E4AA6F;
+}
+
+.place {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 25%;
+	height: 100%;
+}

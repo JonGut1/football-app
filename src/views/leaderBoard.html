@@ -6,8 +6,10 @@
 
 			</li>
 		</ul>
-		<ul class="leadList" class="leadItem" ng-repeat="(key, value) in board.groupPositions">
-			<li class="leadItem" ng-repeat="val in board.groupPositions[key] track by $index"><span class="leadText">{{val}}</span></li>
+		<ul class="leadList" ng-repeat="key in board.playerLeadArrLength" color="{{board.playerLeaderboard[key].color}}" ng-class="board.playerLeaderboard[key].color === 'Gold' || board.playerLeaderboard[key].color === 'Silver' || board.playerLeaderboard[key].color === 'Bronze' ? 'position' : 'default'">
+			<li ng-repeat="keyss in board.playerLeaderboard[key] track by $index" ng-if="$index !== 4" class="place">
+				{{keyss}}
+			</li>
 		</ul>
 	</div>
 </div>

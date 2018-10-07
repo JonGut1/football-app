@@ -4,8 +4,6 @@ angular.module('worldCupScoresApp')
         this.fetchedMatches = false;
         this.fetchedResults = false;
 
-        this.cachedPlayerData = null;
-
         this.results = {
             "results": {},
         }
@@ -158,7 +156,7 @@ angular.module('worldCupScoresApp')
         }
 
         /* evaluates whether the guesses were correct */
-        this.compareGuesses = (data) => {
+        this.compareGuesses = (data, action) => {
             if (data) {
                 const da = {};
                 da.playerData = {};
@@ -170,6 +168,10 @@ angular.module('worldCupScoresApp')
                     console.log('Empty database........');
                 });
                 return data;
+            }
+
+            if (action) {
+                this.playerScores.playerScores = {};
             }
 
             t.fetchPlayerData().then(item => {
@@ -407,7 +409,6 @@ angular.module('worldCupScoresApp')
             .then(response => response.json())
             .then(items => {
                 console.log('fetching player data');
-                this.cachedPlayerData = items;
                 return items;
             });
         };
@@ -430,12 +431,9 @@ angular.module('worldCupScoresApp')
         /* sorts the scores into the correct rankings */
         this.sortScores = (data) => {
             const scores = {
-                equals: {},
                 biggest: {},
                 biggestArr: [],
-                equalsArr: [],
                 biggestArrSorted: [],
-                final: {},
             }
 
             for (names in data.playerScores) {
@@ -452,6 +450,7 @@ angular.module('worldCupScoresApp')
             t.getMaxNum(scores).then(response => {
                 this.playerResults.playerResults = response;
                 t.insertPlayerResults(response);
+                console.log(scores);
             });
 
         }
@@ -473,6 +472,11 @@ angular.module('worldCupScoresApp')
             return new Promise((resolve) => {
                 let count = 0;
                 const final = [];
+                const colorsUsed = {
+                    "Gold": false,
+                    "Silver": false,
+                    "Bronze": false,
+                };
                 const int = setInterval(() => {
                     const max = Math.max(...data.biggestArr);
                     if (data.biggestArrSorted.indexOf(max) === -1) {
@@ -480,74 +484,147 @@ angular.module('worldCupScoresApp')
                             const acc = [];
                             const accCopy = [];
                             const nam = {};
+                            const namCopy = {};
                             for (keys in data.biggest[max]) {
-                                const num = data.biggest[max][keys].points + data.biggest[max][keys].points;
+                                const num = data.biggest[max][keys].points + data.biggest[max][keys].accurate;
                                 if (nam[num] === undefined) {
                                     nam[num] = {};
+                                    namCopy[num] = {};
                                     nam[num][keys] = data.biggest[max][keys];
+                                    namCopy[num][keys] = data.biggest[max][keys];
                                 } else {
                                     nam[num][keys] = data.biggest[max][keys];
+                                    namCopy[num][keys] = data.biggest[max][keys];
                                 }
-                                if (acc.indexOf(num === -1)) {
+                                if (acc.indexOf(num) === -1) {
+                                    console.log(num);
                                     acc.push(num);
                                     accCopy.push(num);
                                 }
                             }
-                            for (key in nam) {
+                            console.log(acc, nam);
+                            for (key in namCopy) {
+                                console.log(acc);
                                 let pla;
                                 const maxEquals = Math.max(...acc);
-                                for (ke in nam[maxEquals]) {
-                                    let placeNaming = '';
-                                    let placeNaming2 = '';
-                                    pla = (count + Object.keys(nam[maxEquals]).length);
-                                        if (count + 1 === 1) {
-                                            placeNaming = 'st';
-                                        } else if (count + 1 === 2) {
-                                            placeNaming = 'nd';
-                                        } else if (count + 1 === 3) {
-                                            placeNaming = 'rd';
-                                        } else {
-                                            placeNaming = 'th';
-                                        }
-
-                                        if (pla === 1) {
-                                            placeNaming2 = 'st';
-                                        } else if (pla === 2) {
-                                            placeNaming2 = 'nd';
-                                        } else if (pla === 3) {
-                                            placeNaming2 = 'rd';
-                                        } else {
-                                            placeNaming2 = 'th';
-                                        }
-
-                                        nam[maxEquals][ke].place = `${count + 1}${placeNaming} - ${pla}${placeNaming2}`;
-
-                                    const obj = {
-                                        [ke]: nam[maxEquals][ke],
-                                    }
-
-                                    final.push(obj);
-                                }
-                                count += (pla - 1);
-                                const index = acc.indexOf(max);
+                                const index = acc.indexOf(maxEquals);
                                 acc.splice(index, 1);
+                                let add = false;
+                                console.log(Object.keys(nam[maxEquals]), acc);
+                                    for (ke in nam[maxEquals]) {
+                                        console.log(ke, nam[maxEquals], Object.keys(nam[maxEquals]).length);
+                                        pla = (count + Object.keys(nam[maxEquals]).length);
+                                        if (Object.keys(nam[maxEquals]).length > 1) {
+                                            let placeNaming = '';
+                                            let placeNaming2 = '';
+                                            console.log(nam[maxEquals], ke, maxEquals);
 
-                            }
+                                            if (count + 1 === 1) {
+                                                if (pla > 1) {
+                                                    colorsUsed['Gold'] = true;
+                                                    nam[maxEquals][ke].color = 'Gold';
+                                                    colorsUsed['Gold'] = true;
+                                                }
+                                                placeNaming = 'st';
+                                            } else if (count + 1 === 2) {
+                                                if (pla > 1) {
+                                                    colorsUsed['Silver'] = true;
+                                                    nam[maxEquals][ke].color = 'Silver';
+                                                    colorsUsed['Silver'] = true;
+                                                }
+
+                                                placeNaming = 'nd';
+                                            } else if (count + 1 === 3) {
+                                                if (pla > 1) {
+                                                    colorsUsed['Bronze'] = true;
+                                                    nam[maxEquals][ke].color = 'Bronze';
+                                                    colorsUsed['Bronze'] = true;
+                                                }
+                                                placeNaming = 'rd';
+                                            } else {
+                                                placeNaming = 'th';
+                                            }
+
+                                            if (pla === 2) {
+                                                placeNaming2 = 'nd';
+                                            } else if (pla === 3) {
+                                                placeNaming2 = 'rd';
+                                            } else {
+                                                placeNaming2 = 'th';
+                                            }
+
+                                            nam[maxEquals][ke].place = `${count + 1}${placeNaming} - ${pla}${placeNaming2}`;
+
+                                            data.biggestArrSorted.push(nam[maxEquals][ke].points);
+                                            console.log(nam[maxEquals][ke]);
+                                            final.push(nam[maxEquals][ke]);
+                                        } else {
+                                            count++;
+                                            let placeNaming = '';
+                                            if (count === 1) {
+                                                    colorsUsed['Gold'] = true;
+                                                    nam[maxEquals][ke].color = 'Gold';
+                                                placeNaming = 'st';
+                                            } else if (count === 2) {
+                                                    colorsUsed['Silver'] = true;
+                                                    nam[maxEquals][ke].color = 'Silver';
+                                                placeNaming = 'nd';
+                                            } else if (count === 3) {
+                                                colorsUsed['Bronze'] = true;
+                                                nam[maxEquals][ke].color = 'Bronze';
+                                                placeNaming = 'rd';
+                                            } else if (colorsUsed['Silver'] === false) {
+                                                colorsUsed['Silver'] = true;
+                                                nam[maxEquals][ke].color = 'Silver';
+                                                placeNaming = 'th';
+                                            } else if (colorsUsed['Bronze'] === false) {
+                                                colorsUsed['Bronze'] = true;
+                                                nam[maxEquals][ke].color = 'Bronze';
+                                                placeNaming = 'th';
+                                            }  else {
+                                                placeNaming = 'th';
+                                            }
+
+                                            console.log(nam.maxEquals, ke, maxEquals);
+
+                                            nam[maxEquals][ke].place = `${count}${placeNaming}`;
+
+                                            data.biggestArrSorted.push(nam[maxEquals][ke].points);
+                                            console.log(nam[maxEquals][ke]);
+                                            final.push(nam[maxEquals][ke]);
+                                        }
+                                    }
+                                    count = pla;
+                                }
 
                         } else {
                             let placeNaming = '';
                             count++
                             if (count === 1) {
+                                colorsUsed['Gold'] = true;
+                                data.biggest[max][Object.keys(data.biggest[max])].color = 'Gold';
                                 placeNaming = 'st';
                             } else if (count === 2) {
+                                colorsUsed['Silver'] = true;
+                                data.biggest[max][Object.keys(data.biggest[max])].color = 'Silver';
                                 placeNaming = 'nd';
                             } else if (count === 3) {
+                                colorsUsed['Bronze'] = true;
+                                data.biggest[max][Object.keys(data.biggest[max])].color = 'Bronze';
                                 placeNaming = 'rd';
+                            } else if (colorsUsed['Silver'] === false) {
+                                colorsUsed['Silver'] = true;
+                                data.biggest[max][Object.keys(data.biggest[max])].color = 'Silver';
+                                placeNaming = 'th';
+                            } else if (colorsUsed['Bronze'] === false) {
+                                colorsUsed['Bronze'] = true;
+                                data.biggest[max][Object.keys(data.biggest[max])].color = 'Bronze';
+                                placeNaming = 'th';
                             } else {
                                 placeNaming = 'th';
                             }
                             data.biggest[max][Object.keys(data.biggest[max])].place = `${count}${placeNaming}`;
-                            final.push(data.biggest[max]);
+                            final.push(data.biggest[max][Object.keys(data.biggest[max])]);
                             data.biggestArrSorted.push(max);
                         }
 
@@ -563,8 +640,7 @@ angular.module('worldCupScoresApp')
 
         }
 
-        /* insert calculated scores into the database */
-        this.insertPlayerScores = () => {
+        this.addPositions = (data) => {
 
         }
 
