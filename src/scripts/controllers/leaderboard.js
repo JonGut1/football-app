@@ -12,15 +12,11 @@ angular.module('worldCupScoresApp')
   			for (let i = 0; i < Object.keys(data.playerResults).length; i++) {
   				arr.push(i);
   			}
-  			console.log(arr);
   			$scope.$apply(() => {
   				this.playerLeadArrLength = arr;
   				t.playerLeaderboard = data.playerResults;
   			});
-  			console.log(t.playerLeaderboard);
   		});
   	}
-
   	t.showLeaderboard();
-
   }]);
